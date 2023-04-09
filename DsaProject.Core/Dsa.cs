@@ -36,6 +36,20 @@ public static class Dsa
 
     public static bool Verify(byte[] data, DsaKey key, BigInteger r, BigInteger s)
     {
+        var hash = SHA256.HashData(data);
+        var hashValue = new BigInteger(hash, isUnsigned: true);
+        return Verify(hashValue, key, r, s);
+    }
+
+    public static bool Verify(Stream data, DsaKey key, BigInteger r, BigInteger s)
+    {
+        var hash = SHA256.HashData(data);
+        var hashValue = new BigInteger(hash, isUnsigned: true);
+        return Verify(hashValue, key, r, s);
+    }
+
+    private static bool Verify(BigInteger hash, DsaKey key, BigInteger r, BigInteger s)
+    {
         if (r < 0 || r > key.Q)
         {
             return false;
@@ -46,10 +60,8 @@ public static class Dsa
             return false;
         }
 
-        var hash = SHA256.HashData(data);
-        var hashValue = new BigInteger(hash, isUnsigned: true);
         var sInv = BigIntegerExtensions.modInverse(s, key.Q);
-        var u1 = (hashValue * sInv) % key.Q;
+        var u1 = (hash * sInv) % key.Q;
         var u2 = (r * sInv) % key.Q;
         var v = ((BigInteger.ModPow(key.G, u1, key.P) * BigInteger.ModPow(key.Y, u2, key.P)) % key.P) % key.Q;
         return v == r;
