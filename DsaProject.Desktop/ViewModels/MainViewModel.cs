@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DsaProject.Core;
+using Microsoft.Win32;
 
 namespace DsaProject.Desktop.ViewModels;
 
@@ -19,11 +21,19 @@ public class MainViewModel : ObservableObject
         GenerateKeyCommand = new RelayCommand(GenerateKey);
         SignCommand = new RelayCommand(Sign);
         VerifyCommand = new RelayCommand(Verify);
+        LoadPlainTextFileCommand = new RelayCommand(LoadPlainTextFile);
+        LoadSignatureFromFileCommand = new RelayCommand(LoadSignatureFromFile);
+        SaveSignatureToFileCommand = new RelayCommand(SaveSignatureToFile);
     }
+    
+    // TODO: zapisywanie i wczytywanie klucza, poprawic wyglad
 
     public ICommand GenerateKeyCommand { get; }
     public ICommand SignCommand { get; }
     public ICommand VerifyCommand { get; }
+    public ICommand LoadPlainTextFileCommand { get; }
+    public ICommand LoadSignatureFromFileCommand { get; }
+    public ICommand SaveSignatureToFileCommand { get; }
 
 
     private DsaKey _dsaKey;
@@ -37,6 +47,7 @@ public class MainViewModel : ObservableObject
     private string _y = null!;
     private string _plainText = null!;
     private string _signature;
+    private bool _useFileAsInput;
 
     public string Q
     {
@@ -115,7 +126,33 @@ public class MainViewModel : ObservableObject
         }
     }
 
+    public bool UseFileAsInput
+    {
+        get => _useFileAsInput;
+        set
+        {
+            if (value == _useFileAsInput) return;
+            _useFileAsInput = value;
+            OnPropertyChanged();
+        }
+    }
+
     #endregion
+
+    private string? _plainTextFileName;
+
+    private void LoadPlainTextFile()
+    {
+        var fileDialog = new OpenFileDialog();
+        if (fileDialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        _plainTextFileName = fileDialog.FileName;
+        PlainText = "File Loaded";
+        UseFileAsInput = true;
+    }
 
     private void GenerateKey()
     {
@@ -134,14 +171,30 @@ public class MainViewModel : ObservableObject
 
     private void Sign()
     {
-        var data = Encoding.UTF8.GetBytes(PlainText);
-        var (r, s) = Dsa.Sign(data, _dsaKey);
+        BigInteger r, s;
+        if (UseFileAsInput)
+        {
+            if (_plainTextFileName is not null)
+            {
+                using var file = File.OpenRead(_plainTextFileName);
+                (r, s) = Dsa.Sign(file, _dsaKey);
+            }
+            else
+            {
+                return;
+            }
+        }
+        else
+        {
+            var data = Encoding.UTF8.GetBytes(PlainText);
+            (r, s) = Dsa.Sign(data, _dsaKey);
+        }
+
         Signature = Convert.ToBase64String(r.ToByteArray()) + '\n' + Convert.ToBase64String(s.ToByteArray());
     }
 
     private void Verify()
     {
-        var data = Encoding.UTF8.GetBytes(PlainText);
         BigInteger r, s;
         try
         {
@@ -149,7 +202,7 @@ public class MainViewModel : ObservableObject
                 .Split('\n')
                 .Select(x => new BigInteger(Convert.FromBase64String(x)))
                 .ToArray();
-            
+
             r = signature[0];
             s = signature[1];
         }
@@ -159,8 +212,49 @@ public class MainViewModel : ObservableObject
             return;
         }
 
-        var result = Dsa.Verify(data, _dsaKey, r, s);
+        bool result;
+
+        if (UseFileAsInput)
+        {
+            if (_plainTextFileName is not null)
+            {
+                using var file = File.OpenRead(_plainTextFileName);
+                result = Dsa.Verify(file, _dsaKey, r, s);
+            }
+            else
+            {
+                return;
+            }
+        }
+        else
+        {
+            var data = Encoding.UTF8.GetBytes(PlainText);
+            result = Dsa.Verify(data, _dsaKey, r, s);
+        }
 
         MessageBox.Show(result ? "Success" : "Fail");
+    }
+
+    private void SaveSignatureToFile()
+    {
+        var fileDialog = new SaveFileDialog();
+        if (fileDialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        File.WriteAllText(fileDialog.FileName, Signature);
+    }
+    
+
+    private void LoadSignatureFromFile()
+    {
+        var fileDialog = new OpenFileDialog();
+        if (fileDialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        Signature = File.ReadAllText(fileDialog.FileName);
     }
 }

@@ -3,12 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DsaProject.Desktop"
         xmlns:vm="clr-namespace:DsaProject.Desktop.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="1110">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
+    <Window.Resources>
+        <local:BoolInvertConverter x:Key="BoolInvertConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -21,24 +25,24 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
-            <StackPanel Orientation="Horizontal">
-                <Label>Q</Label>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
+                <Label Width="30">Q:</Label>
                 <TextBox Text="{Binding Q}" Width="500" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label>P</Label>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
+                <Label Width="30">P:</Label>
                 <TextBox Text="{Binding P}" Width="500" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label>G</Label>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
+                <Label Width="30">G:</Label>
                 <TextBox Text="{Binding G}" Width="500" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label>X (private key)</Label>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
+                <Label Width="100">X (private key)</Label>
                 <TextBox Text="{Binding X}" Width="500" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label>Y (public key)</Label>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
+                <Label Width="100">Y (public key)</Label>
                 <TextBox Text="{Binding Y}" Width="500" />
             </StackPanel>
             <Button
@@ -57,17 +61,18 @@
                 TextWrapping="Wrap"
                 ScrollViewer.VerticalScrollBarVisibility="Visible">
             </TextBox>
+            <Button Command="{Binding LoadPlainTextFileCommand}">Load</Button>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
             <Label Content="Use data from:" />
-            <!-- <RadioButton -->
-            <!--     GroupName="InputSource" -->
-            <!--     Content="File" -->
-            <!--     IsChecked="{Binding UseFileAsInput}" /> -->
-            <!-- <RadioButton -->
-            <!--     GroupName="InputSource" -->
-            <!--     Content="Text" -->
-            <!--     IsChecked="{Binding UseFileAsInput, Converter={StaticResource BoolInvertConverter}}" /> -->
+            <RadioButton
+                GroupName="InputSource"
+                Content="File"
+                IsChecked="{Binding UseFileAsInput}" />
+            <RadioButton
+                GroupName="InputSource"
+                Content="Text"
+                IsChecked="{Binding UseFileAsInput, Converter={StaticResource BoolInvertConverter}}" />
             <Button
                 Command="{Binding SignCommand}"
                 Content="Sign ->"
@@ -89,6 +94,10 @@
                 TextWrapping="Wrap"
                 ScrollViewer.VerticalScrollBarVisibility="Visible">
             </TextBox>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding LoadSignatureFromFileCommand}">Load</Button>
+                <Button Command="{Binding SaveSignatureToFileCommand}">Save</Button>
+            </StackPanel>
         </StackPanel>
 
     </Grid>
