@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DsaProject.Desktop"
         xmlns:vm="clr-namespace:DsaProject.Desktop.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1110">
+        Title="MainWindow" Height="650" Width="1110" ResizeMode="NoResize">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -40,10 +40,30 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
                 <Label Width="100">X (private key)</Label>
                 <TextBox Text="{Binding X}" Width="500" />
+                <Button
+                    Width="100" Margin="10 0 0 0 "
+                    Command="{Binding SavePrivateKeyToFileCommand}">
+                    Save
+                </Button>
+                <Button
+                    Width="100" Margin="10 0 0 0 "
+                    Command="{Binding LoadPrivateKeyFromFileCommand}">
+                    Load
+                </Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 5">
                 <Label Width="100">Y (public key)</Label>
                 <TextBox Text="{Binding Y}" Width="500" />
+                <Button
+                    Width="100" Margin="10 0 0 0 "
+                    Command="{Binding SavePublicKeyToFileCommand}">
+                    Save
+                </Button>
+                <Button
+                    Width="100" Margin="10 0 0 0 "
+                    Command="{Binding LoadPublicKeyFromFileCommand}">
+                    Load
+                </Button>
             </StackPanel>
             <Button
                 Width="200"
@@ -55,13 +75,14 @@
             <Label>Plain Text</Label>
             <TextBox
                 Text="{Binding PlainText}"
-                Background="LightBlue"
+                Background="Orange"
                 Width="450" Height="300"
                 FontSize="20"
                 TextWrapping="Wrap"
                 ScrollViewer.VerticalScrollBarVisibility="Visible">
             </TextBox>
-            <Button Command="{Binding LoadPlainTextFileCommand}">Load</Button>
+            <Button Command="{Binding LoadPlainTextFileCommand}"
+                    Width="100" Margin="10">Load</Button>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
             <Label Content="Use data from:" />
@@ -94,9 +115,11 @@
                 TextWrapping="Wrap"
                 ScrollViewer.VerticalScrollBarVisibility="Visible">
             </TextBox>
-            <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding LoadSignatureFromFileCommand}">Load</Button>
-                <Button Command="{Binding SaveSignatureToFileCommand}">Save</Button>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Command="{Binding LoadSignatureFromFileCommand}"
+                        Width="100" Margin="10">Load</Button>
+                <Button Command="{Binding SaveSignatureToFileCommand}"
+                        Width="100" Margin="10">Save</Button>
             </StackPanel>
         </StackPanel>
 
